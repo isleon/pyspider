@@ -66,7 +66,7 @@ setup(
         'Flask-Login>=0.2.11',
         'u-msgpack-python>=1.6',
         'click>=3.3',
-        'six>=1.8.0',
+        'six',
     ],
 
     extras_require={
@@ -74,7 +74,7 @@ setup(
             'mysql-connector-python>=1.2.2',
             'pika>=0.9.14',
             'amqp>=1.3.0',
-            'pymongo>=2.7.2',
+            'pymongo>=2.7.2,<3.0',
             'unittest2>=0.5.1',
             'SQLAlchemy>=0.9.7'
         ],

@@ -13,47 +13,14 @@ import fractions
 import six
 from six import add_metaclass, iteritems
 
-from pyspider.libs.log import LogFormatter
-from pyspider.libs.url import quote_chinese, _build_url, _encode_params, _encode_multipart_formdata
-from pyspider.libs.utils import md5string, hide_me, pretty_unicode
+from pyspider.libs.url import (
+    quote_chinese, _build_url, _encode_params,
+    _encode_multipart_formdata, curl_to_arguments)
+from pyspider.libs.utils import md5string
 from pyspider.libs.ListIO import ListO
 from pyspider.libs.response import rebuild_response
 from pyspider.libs.pprint import pprint
-
-
-class ProcessorResult(object):
-    """The result and logs producted by a callback"""
-
-    def __init__(self, result, follows, messages, logs, exception, extinfo):
-        self.result = result
-        self.follows = follows
-        self.messages = messages
-        self.logs = logs
-        self.exception = exception
-        self.extinfo = extinfo
-
-    def rethrow(self):
-        """rethrow the exception"""
-
-        if self.exception:
-            raise self.exception
-
-    def logstr(self):
-        """handler the log records to formatted string"""
-
-        result = []
-        formater = LogFormatter(color=False)
-        for record in self.logs:
-            if isinstance(record, six.string_types):
-                result.append(pretty_unicode(record))
-            else:
-                if record.exc_info:
-                    a, b, tb = record.exc_info
-                    tb = hide_me(tb, globals())
-                    record.exc_info = a, b, tb
-                result.append(pretty_unicode(formater.format(record)))
-                result.append(u'\n')
-        return u''.join(result)
+from pyspider.processor import ProcessorResult
 
 
 def catch_status_code_error(func):
@@ -295,7 +262,8 @@ class BaseHandler(object):
                 'js_run_at',
                 'js_script',
                 'load_images',
-                'fetch_type'
+                'fetch_type',
+                'use_gzip',
         ):
             if key in kwargs:
                 fetch[key] = kwargs.pop(key)
@@ -362,6 +330,12 @@ class BaseHandler(object):
 
           full documents: http://pyspider.readthedocs.org/en/latest/apis/self.crawl/
         '''
+
+        if isinstance(url, six.string_types) and url.startswith('curl '):
+            curl_kwargs = curl_to_arguments(url)
+            url = curl_kwargs.pop('urls')
+            for k, v in iteritems(curl_kwargs):
+                kwargs.setdefault(k, v)
 
         if isinstance(url, six.string_types):
             return self._crawl(url, **kwargs)
