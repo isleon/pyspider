@@ -23,9 +23,13 @@ class ProjectDB(SQLiteMixin, BaseProjectDB, BaseDB):
         self._execute('''CREATE TABLE IF NOT EXISTS `%s` (
                 name PRIMARY KEY,
                 `group`,
-                status, script, comments,
+                status, script, version, comments,
                 rate, burst, updatetime
                 )''' % self.__tablename__)
+        self._execute('''CREATE TABLE IF NOT EXISTS `%s` (
+                `project`, `script`, `version`,
+                `updatetime`, `updateuser`
+                )''' % 'history')
 
     def insert(self, name, obj={}):
         obj = dict(obj)
@@ -33,11 +37,20 @@ class ProjectDB(SQLiteMixin, BaseProjectDB, BaseDB):
         obj['updatetime'] = time.time()
         return self._insert(**obj)
 
+    def insert_history(self, project, version, obj={}):
+        obj = dict(obj)
+        obj['project'] = project
+        obj['version'] = version
+        obj['updatetime'] = time.time()
+        # obj['updateuser'] = get_current_user()
+        return self._insert(**obj)
+
     def update(self, name, obj={}, **kwargs):
         obj = dict(obj)
         obj.update(kwargs)
         obj['updatetime'] = time.time()
-        ret = self._update(where="`name` = %s" % self.placeholder, where_values=(name, ), **obj)
+        ret = self._update(where="`name` = %s" %
+                           self.placeholder, where_values=(name, ), **obj)
         return ret.rowcount
 
     def get_all(self, fields=None):

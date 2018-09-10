@@ -172,18 +172,26 @@ def save(project):
     if not projectdb.verify_project_name(project):
         return 'project name is not allowed!', 400
     script = request.form['script']
-    project_info = projectdb.get(project, fields=['name', 'status', 'group'])
+    project_info = projectdb.get(
+        project, fields=['name', 'status', 'group', 'script', 'version'])
     if project_info and 'lock' in projectdb.split_group(project_info.get('group')) \
             and not login.current_user.is_active():
         return app.login_response
 
     if project_info:
+        version = project_info.get('version', 0)
         info = {
             'script': script,
+            'version': version + 1,
+        }
+        history = {
+            'script': project_info['script'],
+            'version': version,
         }
         if project_info.get('status') in ('DEBUG', 'RUNNING', ):
             info['status'] = 'CHECKING'
         projectdb.update(project, info)
+        projectdb.insert_history(project, version, history)  # 更新当前脚本前先存档
     else:
         info = {
             'name': project,

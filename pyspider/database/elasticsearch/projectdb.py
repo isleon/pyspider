@@ -43,6 +43,14 @@ class ProjectDB(BaseProjectDB):
         return self.es.index(index=self.index, doc_type=self.__type__, body=obj, id=name,
                              refresh=True)
 
+    def insert_history(self, project, version, obj={}):
+        obj = dict(obj)
+        obj['project'] = project
+        obj['version'] = version
+        obj['updatetime'] = time.time()
+
+        return self.es.index(index=self.index, doc_type=self.__type__, body=obj, id='%s:%s' % (project, version), refresh=True)
+
     def update(self, name, obj={}, **kwargs):
         obj = dict(obj)
         obj.update(kwargs)
@@ -52,7 +60,8 @@ class ProjectDB(BaseProjectDB):
 
     def get_all(self, fields=None):
         for record in elasticsearch.helpers.scan(self.es, index=self.index, doc_type=self.__type__,
-                                                 query={'query': {"match_all": {}}},
+                                                 query={
+                                                     'query': {"match_all": {}}},
                                                  _source_include=fields or []):
             yield record['_source']
 

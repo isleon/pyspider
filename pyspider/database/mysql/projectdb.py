@@ -30,11 +30,19 @@ class ProjectDB(MySQLMixin, BaseProjectDB, BaseDB):
             `group` varchar(64),
             `status` varchar(16),
             `script` TEXT,
+            `version` int(10),
             `comments` varchar(1024),
             `rate` float(11, 4),
             `burst` float(11, 4),
             `updatetime` double(16, 4)
             ) ENGINE=InnoDB CHARSET=utf8''' % self.escape(self.__tablename__))
+        self._execute('''CREATE TABLE IF NOT EXISTS %s (
+            `project` varchar(64),
+            `script` TEXT,
+            `version` int(10),
+            `updatetime` double(16, 4),
+            `updateuser` varchar(64)
+            ) ENGINE=InnoDB CHARSET=utf8''' % self.escape('history'))
 
     def insert(self, name, obj={}):
         obj = dict(obj)
@@ -42,11 +50,20 @@ class ProjectDB(MySQLMixin, BaseProjectDB, BaseDB):
         obj['updatetime'] = time.time()
         return self._insert(**obj)
 
+    def insert_history(self, project, version, obj={}):
+        obj = dict(obj)
+        obj['project'] = project
+        obj['version'] = version
+        obj['updatetime'] = time.time()
+        # obj['updateuser'] = get_current_user()
+        return self._insert(tablename='history', **obj)
+
     def update(self, name, obj={}, **kwargs):
         obj = dict(obj)
         obj.update(kwargs)
         obj['updatetime'] = time.time()
-        ret = self._update(where="`name` = %s" % self.placeholder, where_values=(name, ), **obj)
+        ret = self._update(where="`name` = %s" %
+                           self.placeholder, where_values=(name, ), **obj)
         return ret.rowcount
 
     def get_all(self, fields=None):

@@ -15,12 +15,20 @@ import re
         'group': str,
         'status': str,
         'script': str,
+        'version': int,
         # 'config': str,
         'comments': str,
         # 'priority': int,
         'rate': int,
         'burst': int,
         'updatetime': int,
+    },
+    'history': {
+        'project': str,
+        'version': int,
+        'itag': str,
+        'updatetime': int,
+        'updateuser': str
     }
 }
 
@@ -35,6 +43,10 @@ class ProjectDB(object):
     ]
 
     def insert(self, name, obj={}):
+        raise NotImplementedError
+
+    def insert_history(self, project, version, obj={}):
+        """更新项目时，插入脚本历史"""
         raise NotImplementedError
 
     def update(self, name, obj={}, **kwargs):
