@@ -19,6 +19,7 @@ class ProjectDB(BaseProjectDB):
         self.conn.admin.command("ismaster")
         self.database = self.conn[database]
         self.collection = self.database[self.__collection_name__]
+        self.collection_history = self.database['history']
 
         self.collection.ensure_index('name', unique=True)
 
@@ -39,6 +40,13 @@ class ProjectDB(BaseProjectDB):
         obj['name'] = name
         obj['updatetime'] = time.time()
         return self.collection.update({'name': name}, {'$set': obj}, upsert=True)
+
+    def insert_history(self, project, version, obj={}):
+        obj = dict(obj)
+        obj['project'] = project
+        obj['version'] = version
+        obj['updatetime'] = time.time()
+        return self.collection_history.update({'project': project, 'version': version}, {'$set': obj}, upsert=True)
 
     def update(self, name, obj={}, **kwargs):
         obj = dict(obj)

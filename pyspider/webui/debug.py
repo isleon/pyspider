@@ -179,7 +179,7 @@ def save(project):
         return app.login_response
 
     if project_info:
-        version = project_info.get('version', 0)
+        version = project_info['version'] or 0
         info = {
             'script': script,
             'version': version + 1,

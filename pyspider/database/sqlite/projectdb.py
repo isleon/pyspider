@@ -43,7 +43,7 @@ class ProjectDB(SQLiteMixin, BaseProjectDB, BaseDB):
         obj['version'] = version
         obj['updatetime'] = time.time()
         # obj['updateuser'] = get_current_user()
-        return self._insert(**obj)
+        return self._insert(tablename='history', **obj)
 
     def update(self, name, obj={}, **kwargs):
         obj = dict(obj)
