@@ -1,4 +1,7 @@
 {
+  "projectdb": "mysql+projectdb://pyspider:rP778Zv4yVGtu)iP@192.168.30.53:3307/projectdb_temp",
+  "taskdb": "mysql+taskdb://pyspider:rP778Zv4yVGtu)iP@192.168.30.53:3307/taskdb_temp",
+  "resultdb": "mysql+resultdb://pyspider:rP778Zv4yVGtu)iP@192.168.30.53:3307/resultdb_temp",
   "webui": {
     "port": 5555,
     "username": "admin",

@@ -28,35 +28,43 @@ class ProjectDB(SQLiteMixin, BaseProjectDB, BaseDB):
                 name PRIMARY KEY,
                 `group`,
                 status, script, version, comments,
-                rate, burst, updatetime
+                rate, burst, 
+                createuser, updateuser,
+                createtime, updatetime
                 )''' % self.__tablename__)
         self._execute('''CREATE TABLE IF NOT EXISTS `%s` (
-                `project`, `script`, `version`,
-                `updatetime`, `updateuser`
+                project, script, version,
+                createtime, createuser
                 )''' % 'history')
         self._execute('''CREATE TABLE IF NOT EXISTS `%s` (
-                `name`, `password`, `updatetime`
+                name PRIMARY KEY, password, 
+                createtime, updatetime
                 )''' % 'users')
 
     def insert(self, name, obj={}):
         obj = dict(obj)
         obj['name'] = name
-        obj['updatetime'] = time.time()
+        if login.current_user:
+            obj['createuser'] = login.current_user.id
+        obj['createtime'] = time.time()
+        # obj['updatetime'] = time.time()
         return self._insert(**obj)
 
     def insert_history(self, project, version, obj={}):
         obj = dict(obj)
         obj['project'] = project
         obj['version'] = version
-        obj['updatetime'] = time.time()
+        obj['createtime'] = time.time()
         if login.current_user:
-            obj['updateuser'] = login.current_user.id
+            obj['createuser'] = login.current_user.id
         return self._insert(tablename='history', **obj)
 
     def update(self, name, obj={}, **kwargs):
         obj = dict(obj)
         obj.update(kwargs)
         obj['updatetime'] = time.time()
+        if login.current_user:
+            obj['updateuser'] = login.current_user.id
         ret = self._update(where="`name` = %s" %
                            self.placeholder, where_values=(name, ), **obj)
         return ret.rowcount

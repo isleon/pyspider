@@ -38,24 +38,32 @@ class ProjectDB(MySQLMixin, BaseProjectDB, BaseDB):
             `comments` varchar(1024),
             `rate` float(11, 4),
             `burst` float(11, 4),
+            `createuser` varchar(64),
+            `updateuser` varchar(64),
+            `createtime` double(16, 4),
             `updatetime` double(16, 4)
             ) ENGINE=InnoDB CHARSET=utf8''' % self.escape(self.__tablename__))
         self._execute('''CREATE TABLE IF NOT EXISTS %s (
             `project` varchar(64),
             `script` TEXT,
             `version` int(10),
-            `updatetime` double(16, 4),
-            `updateuser` varchar(64)
+            `createuser` varchar(64),
+            `createtime` double(16, 4),
+            PRIMARY KEY (`project`,`version`)
             ) ENGINE=InnoDB CHARSET=utf8''' % self.escape('history'))
         self._execute('''CREATE TABLE IF NOT EXISTS %s (
-            `name` varchar(64),
+            `name` varchar(64) PRIMARY KEY,
             `password` varchar(64),
+            `createtime` double(16, 4),
             `updatetime` double(16, 4)
             ) ENGINE=InnoDB CHARSET=utf8''' % self.escape('users'))
 
     def insert(self, name, obj={}):
         obj = dict(obj)
         obj['name'] = name
+        if login.current_user:
+            obj['createuser'] = login.current_user.id
+        obj['createtime'] = time.time()
         obj['updatetime'] = time.time()
         return self._insert(**obj)
 
@@ -63,15 +71,17 @@ class ProjectDB(MySQLMixin, BaseProjectDB, BaseDB):
         obj = dict(obj)
         obj['project'] = project
         obj['version'] = version
-        obj['updatetime'] = time.time()
+        obj['createtime'] = time.time()
         if login.current_user:
-            obj['updateuser'] = login.current_user.id
+            obj['createuser'] = login.current_user.id
         return self._insert(tablename='history', **obj)
 
     def update(self, name, obj={}, **kwargs):
         obj = dict(obj)
         obj.update(kwargs)
         obj['updatetime'] = time.time()
+        if login.current_user:
+            obj['updateuser'] = login.current_user.id
         ret = self._update(where="`name` = %s" %
                            self.placeholder, where_values=(name, ), **obj)
         return ret.rowcount
