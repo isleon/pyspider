@@ -19,16 +19,21 @@ import re
         # 'config': str,
         'comments': str,
         # 'priority': int,
-        'rate': int,
-        'burst': int,
-        'updatetime': int,
+        'rate': float,
+        'burst': float,
+        'updatetime': float,
     },
     'history': {
         'project': str,
         'version': int,
         'itag': str,
-        'updatetime': int,
+        'updatetime': float,
         'updateuser': str
+    },
+    'users': {
+        'name': str,
+        'password': str,
+        'updatetime': float
     }
 }
 
@@ -56,6 +61,9 @@ class ProjectDB(object):
         raise NotImplementedError
 
     def get(self, name, fields):
+        raise NotImplementedError
+
+    def get_user(self, name, password):
         raise NotImplementedError
 
     def drop(self, name):

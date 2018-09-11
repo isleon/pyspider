@@ -39,3 +39,4 @@ nosetests.xml
 .idea
 .vscode
 samples
+data

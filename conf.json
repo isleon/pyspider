@@ -1,0 +1,8 @@
+{
+  "webui": {
+    "port": 5555,
+    "username": "admin",
+    "password": "p@ssw0rd",
+    "need-auth": true
+  }
+}

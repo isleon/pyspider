@@ -15,6 +15,7 @@ from .app import app
 
 login_manager = login.LoginManager()
 login_manager.init_app(app)
+# login_manager.login_view = 'login'
 
 
 class AnonymousUser(login.AnonymousUserMixin):
@@ -44,7 +45,11 @@ class User(login.UserMixin):
         if self.id == app.config.get('webui_username') \
                 and self.password == app.config.get('webui_password'):
             return True
-        return False
+
+        projectdb = app.config['projectdb']
+        user = projectdb.get_user(self.id, base64.b64encode(self.password))
+
+        return user is not None
 
     def is_active(self):
         return self.is_authenticated()
@@ -65,6 +70,8 @@ def load_user_from_request(request):
             app.logger.error('wrong api key: %r, %r', api_key, e)
             return None
     return None
+
+
 app.login_response = Response(
     "need auth.", 401, {'WWW-Authenticate': 'Basic realm="Login Required"'}
 )
